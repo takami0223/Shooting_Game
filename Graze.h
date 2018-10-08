@@ -1,0 +1,40 @@
+#pragma once
+
+#include "define.h"
+
+class Graze
+{
+private:
+
+	//グラフィックハンドル
+	static int gh;
+
+	//座標
+	double x, y;
+
+	//角度
+	double rad;
+
+	//アルファ値
+	int alpha;
+
+	//拡大率
+	double rate;
+
+	//カウント
+	int count;
+
+	//実行中かどうかのフラグ
+	bool flag;
+
+private:
+	void Move();
+	void Draw();
+public:
+	Graze();
+	void SetFlag( double x, double y );
+	bool GetFlag();
+	void Update_All();
+	void Draw_All();
+	void All();
+};
