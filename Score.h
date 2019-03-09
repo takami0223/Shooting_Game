@@ -30,6 +30,34 @@ private:
 	int high_score, score, graze, stock, life, power, speed;
 	int power_limit, speed_limit;
 
+	int grazeGauge = 0;
+	double g_h;
+	unsigned int g_r;
+	unsigned int g_g;
+	unsigned int g_b;
+
+	int lifeGauge = 0;
+	double l_h;
+	unsigned int l_r;
+	unsigned int l_g;
+	unsigned int l_b;
+
+	int speedGauge = 0;
+	double s_h;
+	unsigned int s_r;
+	unsigned int s_g;
+	unsigned int s_b;
+
+	int powerGauge = 0;
+	double p_h;
+	unsigned int p_r;
+	unsigned int p_g;
+	unsigned int p_b;
+
+	int gauge_width = 0;
+
+	static int gauge_cover, gauge_base;  //グラフィックハンドル格納用配列
+
 private:
 	void Draw();
 

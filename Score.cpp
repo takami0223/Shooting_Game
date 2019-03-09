@@ -5,6 +5,10 @@
 //#include <stdio.h>
 //#include "define.h"
 
+int Score::gauge_base = 0;
+int Score::gauge_cover = 0;
+
+
 Score::Score()
 {
 
@@ -17,6 +21,12 @@ Score::Score()
 	LoadDivGraph( "../images/number01.png", 10, 10, 1, 19, 27, g_hi_powernumber );
 	LoadDivGraph( "../images/shot_chara1.png", 12, 3, 4, 29, 40, g_stock );
 
+	if (gauge_cover == 0 || gauge_base == 0)
+	{
+		gauge_cover = LoadGraph( "../images/gauge_cover02.png" );
+		gauge_base = LoadGraph( "../images/gauge_base01.png" );
+	}
+
 	high_score = 0;
 	score = 0;
 	graze = 0;
@@ -26,6 +36,17 @@ Score::Score()
 	power_limit = POWER_DEFAULT_LIMIT;
 	speed = 0;
 	speed_limit = SPEED_DEFAULT_LIMIT;
+
+	grazeGauge = lifeGauge = speedGauge = powerGauge = 0;
+	gauge_width = 88;
+
+	g_h = l_h = s_h = p_h = 0;
+
+	g_r = g_g = g_b = 0;
+	l_r = l_g = l_b = 0;
+	s_r = s_g = s_b = 0;
+	p_r = p_g = p_b = 0;
+
 }
 
 void Score::SetScore( ScoreData data, int val )
@@ -151,6 +172,13 @@ void Score::Draw()
 	}
 
 	//グレイズ数描画
+	grazeGauge = gauge_width * (graze % BARRIER_OPEN_NUM) / BARRIER_OPEN_NUM;
+	g_h = (graze % BARRIER_OPEN_NUM) * (512.0f / BARRIER_OPEN_NUM) - 100;
+	g_r = min( max( (384 - g_h), 0 ), 0xff );
+	g_g = min( max( (g_h + 64), 0 ), 0xff );
+	g_b = max( (g_h - 384), 0 );
+	DrawBox( SCORE_X + 110, 137, SCORE_X + 110 + grazeGauge, 156, GetColor( g_r, g_g, g_b ), true );
+
 	num = snprintf( buf, sizeof( buf ), "%d", graze );
 	if (graze >= GRAZE_LINIT)
 	{
@@ -168,6 +196,13 @@ void Score::Draw()
 	}
 
 	//ライフ数描画
+	lifeGauge = gauge_width * life / LIFE_LIMIT;
+	l_h = life * (512.0f / LIFE_LIMIT) - 100;
+	l_r = min( max( (384 - l_h), 0 ), 0xff );
+	l_g = min( max( (l_h + 64), 0 ), 0xff );
+	l_b = max( (l_h - 384), 0 );
+	DrawBox( SCORE_X + 110, 167, SCORE_X + 110 + lifeGauge, 186, GetColor( l_r, l_g, l_b ), true );
+
 	num = snprintf( buf, sizeof( buf ), "%d", life );
 	if (life >= LIFE_LIMIT)
 	{
@@ -185,6 +220,13 @@ void Score::Draw()
 	}
 
 	//スピード数描画
+	speedGauge = gauge_width * speed / speed_limit;
+	s_h = speed * (512.0f / speed_limit) - 100;
+	s_r = min( max( (384 - s_h), 0 ), 0xff );
+	s_g = min( max( (s_h + 64), 0 ), 0xff );
+	s_b = max( (s_h - 384), 0 );
+	DrawBox( SCORE_X + 110, 197, SCORE_X + 110 + speedGauge, 216, GetColor( s_r, s_g, s_b ), true );
+
 	num = snprintf( buf, sizeof( buf ), "%d", speed );
 	if (speed >= speed_limit)
 	{
@@ -203,6 +245,16 @@ void Score::Draw()
 	}
 
 	//パワー数描画
+	powerGauge = gauge_width * power / power_limit;
+	p_h = power * (512.0f / power_limit) - 100;
+	p_r = min( max( (384 - p_h), 0 ), 0xff );
+	p_g = min( max( (p_h + 64), 0 ), 0xff );
+	p_b = max( (p_h - 384), 0 );
+
+	//DrawGraph( SCORE_X + 110, 240, gauge_base, true );
+	DrawBox( SCORE_X + 110, 227, SCORE_X + 110 + powerGauge, 246, GetColor( p_r, p_g, p_b ), true );
+	//DrawGraph( SCORE_X + 110, 240, gauge_cover, true );
+
 	num = snprintf( buf, sizeof( buf ), "%d", power );
 	if (power >= power_limit)
 	{
@@ -220,7 +272,6 @@ void Score::Draw()
 
 		}
 	}
-
 
 	//ストック数描画
 	for (int i = 0; i < stock; ++i)

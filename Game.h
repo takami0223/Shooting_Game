@@ -34,7 +34,7 @@ struct EnemyData
 	int x;		   //x座標
 	int y;		   //y座標
 	int move_speed;//移動速度
-	int speed;	   //弾スピード
+	int shot_speed;	   //弾スピード
 	int hp;		   //HP
 	int power;	   //弾の攻撃力
 	int barrier_hp;//バリアのHP

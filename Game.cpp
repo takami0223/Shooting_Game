@@ -449,8 +449,10 @@ void Game::Update()
 
 		if (!game_finish_flag)// || !game_clear_flag)
 		{
-			int time = GetSoundTotalTime( s_bgm[now_count] );
-			int sound_time = time / 1000 * 60 + 30;
+			int time = 0;
+			time = GetSoundTotalTime( s_bgm[now_stage] );
+			int sound_time = 0;
+			sound_time = time / 1000 * 60 + 30;
 			if (count % sound_time == 0)
 			{
 				bgm_flag = true;
@@ -713,40 +715,40 @@ void Game::Init_EnemyData()
 	vector<Enemy*> temp_enemy_data;
 	//vector<unique_ptr<Enemy>> temp_enemy_data;
 
-	for (int s = 0; s < STAGE_NUM; s++)
+	for (int stageNum = 0; stageNum < STAGE_NUM; stageNum++)
 	{
 		vector<EnemyData> data;
 
-		for (int i = 0; i < WAVE_NUM; i++)
+		for (int waveNum = 0; waveNum < WAVE_NUM; waveNum++)
 		{
-			bool flag = false;
+			bool ballShootingFlag = false;
 			int wave_enemy;
 
 			//ウェーブの進み具合によって1ウェーブの敵の数を決める
-			if (i < WAVE_NUM / 5)
+			if (waveNum < WAVE_NUM / 5)
 			{
 				//wave_enemy = rand() % 2 + 2; //2 ～ 3
-				wave_enemy = 3 + s; //2 ～ 4
+				wave_enemy = 3 + stageNum; //2 ～ 4
 			}
-			else if (i < (WAVE_NUM / 5) * 2)
+			else if (waveNum < (WAVE_NUM / 5) * 2)
 			{
 				//wave_enemy = rand() % 3 + 2; //2 ～ 4
-				wave_enemy = rand() % 3 + 3 + s; //4 ～ 6
+				wave_enemy = rand() % 3 + 3 + stageNum; //4 ～ 6
 			}
-			else if (i < (WAVE_NUM / 5) * 3)
+			else if (waveNum < (WAVE_NUM / 5) * 3)
 			{
 				//wave_enemy = rand() % 3 + 3; //3 ～ 5
-				wave_enemy = rand() % 2 + 4 + s; //5 ～ 6
+				wave_enemy = rand() % 2 + 4 + stageNum; //5 ～ 6
 			}
-			else if (i < (WAVE_NUM / 5) * 4)
+			else if (waveNum < (WAVE_NUM / 5) * 4)
 			{
 				//wave_enemy = rand() % 4 + 4; //4 ～ 7
-				wave_enemy = rand() % 3 + 4 + s; //5 ～ 7
+				wave_enemy = rand() % 3 + 4 + stageNum; //5 ～ 7
 			}
 			else
 			{
 				//wave_enemy = 10;
-				wave_enemy = rand() % 2 + 6 + s; //7 ～ 8
+				wave_enemy = rand() % 2 + 6 + stageNum; //7 ～ 8
 			}
 
 			//1ウェーブに出現する敵1体1体を設定
@@ -756,10 +758,10 @@ void Game::Init_EnemyData()
 
 				int wave_between = 220; //次のウェーブに進むまでのフレーム数
 
-				temp_data.type = rand() % (s + 1);
+				temp_data.type = rand() % (stageNum + 1);
 
 				//ウェーブの進み具合に応じた「敵のタイプ」「バリアの有無」「バリアのHP」「アイテムのドロップ率」
-				if (i < WAVE_NUM / 4)
+				if (waveNum < WAVE_NUM / 4)
 				{
 					/*
 					temp_data.type = ENEMY_0; //0 ～ 1
@@ -774,7 +776,7 @@ void Game::Init_EnemyData()
 					temp_data.barrier_hp = 0;
 
 				}
-				else if (i < WAVE_NUM / 2)
+				else if (waveNum < WAVE_NUM / 2)
 				{
 					/*
 					temp_data.type = rand() % 2; //0 ～ 1
@@ -790,7 +792,7 @@ void Game::Init_EnemyData()
 
 
 				}
-				else if (i < (WAVE_NUM / 4) * 3)
+				else if (waveNum < (WAVE_NUM / 4) * 3)
 				{
 					/*
 					temp_data.type = rand() % 3; //0 ～ 2
@@ -805,7 +807,7 @@ void Game::Init_EnemyData()
 					else if (item < 10) temp_data.item = ITEM_LIFEUP;
 					*/
 
-					int check = rand() % (s + 1);
+					int check = rand() % (stageNum + 1);
 					if (check == 1) temp_data.barrier_hp = rand() % 3 + 1; //1 ～ 3
 					else temp_data.barrier_hp = 0;
 
@@ -824,7 +826,7 @@ void Game::Init_EnemyData()
 					else if (item < 6) temp_data.item = ITEM_SPEEDUP;
 					else if (item < 10) temp_data.item = ITEM_LIFEUP;
 					*/
-					int check = rand() % (s + 1);
+					int check = rand() % (stageNum + 1);
 					if (check == 2) temp_data.barrier_hp = rand() % 2 + 4; //4 ～ 5
 					else temp_data.barrier_hp = 0;
 				}
@@ -832,36 +834,63 @@ void Game::Init_EnemyData()
 				//敵の種類によって固定される「移動スピード」「弾のスピード」「HP」「弾の攻撃力」を変更
 				switch (temp_data.type)
 				{
+					/*varsion0.8*/
+					/*
 					case ENEMY_0:
 						temp_data.move_speed = 2;
 						temp_data.speed = 3;
-						temp_data.hp = 1 * (s + 1);
-						temp_data.power = 1 * (s + 1);
+						temp_data.hp = 1 * (stageNum + 1);
+						temp_data.power = 1 * (stageNum + 1);
 						break;
 
 					case ENEMY_1:
 						temp_data.move_speed = rand() % 2 + 2; //2 ～ 3
 						temp_data.speed = rand() % 2 + 3; //3 ～ 4
-						temp_data.hp = 5 * (s + 1);
-						temp_data.power = 2 * (s + 1);
+						temp_data.hp = 5 * (stageNum + 1);
+						temp_data.power = 2 * (stageNum + 1);
 						break;
 
 					case ENEMY_2:
 						temp_data.move_speed = rand() % 2 + 3; //3 ～ 4
 						temp_data.speed = rand() % 3 + 4; //4 ～ 6
-						temp_data.hp = 15 * (s + 1);
-						temp_data.power = 3 * (s + 1);
+						temp_data.hp = 15 * (stageNum + 1);
+						temp_data.power = 3 * (stageNum + 1);
 						break;
 
 					default:
 						break;
+					*/
+					case ENEMY_0:
+						temp_data.move_speed = 2;
+						temp_data.shot_speed = 3;
+						temp_data.hp = 1;
+						temp_data.power = 1;
+						break;
+
+					case ENEMY_1:
+						temp_data.move_speed = 3;
+						temp_data.shot_speed = 4;
+						temp_data.hp = 3;
+						temp_data.power = 2;
+						break;
+
+					case ENEMY_2:
+						temp_data.move_speed = 4;
+						temp_data.shot_speed = 5;
+						temp_data.hp = 5;
+						temp_data.power = 3;
+						break;
+
+					default:
+						break;
+
 				}
 
 				//1waveに乱射タイプの敵は一体まで(そいつは移動制限)に制限
 				do
 				{
 					temp_data.stype = rand() % BALL_TYPE_NUM;
-				} while (flag == true && temp_data.stype == BALL_SHOOTING);
+				} while (ballShootingFlag == true && temp_data.stype == BALL_SHOOTING);
 
 				//弾の種類によって固定される「発射パターン」「サウンド」「移動パターン」を決定
 				switch (temp_data.stype)
@@ -883,7 +912,7 @@ void Game::Init_EnemyData()
 						temp_data.s_pattern = SHOT_HOMING_SHOOTING;
 						temp_data.sound = SOUND_HOMING_SHOOTING;
 						temp_data.m_pattern = MOVE_LINEDOWN;
-						flag = true;
+						ballShootingFlag = true;
 						break;
 
 					default:
@@ -891,7 +920,7 @@ void Game::Init_EnemyData()
 				}
 
 				//temp_data.m_pattern = rand() % M_PATTEAN_NUM;
-				temp_data.in_time = wave_between * i + 60;
+				temp_data.in_time = wave_between * waveNum + 60;
 				temp_data.stop_time = temp_data.in_time + 60;
 				temp_data.shot_time = temp_data.stop_time + 1;
 				temp_data.out_time = temp_data.shot_time + 80;
@@ -934,28 +963,33 @@ void Game::Init_EnemyData()
 				3:HP回復
 				*/
 
-				int item = rand() % 10;
-				if (s == 0)
+				int itemRand = rand() % 10;
+				if (stageNum == 0)
 				{
-					if (item < 2) temp_data.item = ITEM_SCOREUP;
-					else if (item < 5) temp_data.item = ITEM_POWERUP;
-					else if (item < 7) temp_data.item = ITEM_SPEEDUP;
-					else if (item < 10) temp_data.item = ITEM_LIFEUP;
+					if (itemRand < 2) temp_data.item = ITEM_SCOREUP;
+					else if (itemRand < 5) temp_data.item = ITEM_POWERUP;
+					else if (itemRand < 7) temp_data.item = ITEM_SPEEDUP;
+					else if (itemRand < 10) temp_data.item = ITEM_LIFEUP;
 				}
-				if (s == 1)
+				if (stageNum == 1)
 				{
-					if (item < 3) temp_data.item = ITEM_SCOREUP;
-					else if (item < 5) temp_data.item = ITEM_POWERUP;
-					else if (item < 7) temp_data.item = ITEM_SPEEDUP;
-					else if (item < 10) temp_data.item = ITEM_LIFEUP;
+					if (itemRand < 3) temp_data.item = ITEM_SCOREUP;
+					else if (itemRand < 5) temp_data.item = ITEM_POWERUP;
+					else if (itemRand < 7) temp_data.item = ITEM_SPEEDUP;
+					else if (itemRand < 10) temp_data.item = ITEM_LIFEUP;
 				}
-				if (s == 2)
+				if (stageNum == 2)
 				{
-					if (item < 5) temp_data.item = ITEM_SCOREUP;
-					else if (item < 6) temp_data.item = ITEM_POWERUP;
-					else if (item < 7) temp_data.item = ITEM_SPEEDUP;
-					else if (item < 10) temp_data.item = ITEM_LIFEUP;
+					if (itemRand < 5) temp_data.item = ITEM_SCOREUP;
+					else if (itemRand < 6) temp_data.item = ITEM_POWERUP;
+					else if (itemRand < 7) temp_data.item = ITEM_SPEEDUP;
+					else if (itemRand < 10) temp_data.item = ITEM_LIFEUP;
 				}
+				else
+				{
+					temp_data.item = rand() % ITEM_TYPE_NUM;
+				}
+
 				//temp_data.item = 1;
 				/*
 				int random = rand() % 2;
@@ -990,7 +1024,7 @@ void Game::Init_EnemyData()
 			//delete temp;
 
 			temp_enemy_data.push_back( new Enemy( data[i].type, data[i].stype, data[i].m_pattern, data[i].s_pattern, data[i].in_time, data[i].stop_time, data[i].shot_time,
-												  data[i].out_time, data[i].x, data[i].y, data[i].move_speed, data[i].speed, data[i].hp, data[i].power, data[i].barrier_hp, data[i].item, data[i].sound ) );
+												  data[i].out_time, data[i].x, data[i].y, data[i].move_speed, data[i].shot_speed, data[i].hp, data[i].power, data[i].barrier_hp, data[i].item, data[i].sound ) );
 
 					   //delete temp[i];
 					   //*temp++;
@@ -1120,7 +1154,7 @@ void Game::EnemyCollisionAll()
 								{
 									if (!item[i].GetFlag())
 									{
-										if ((rand() % 10) >= 6)
+										if ((rand() % 10) >= 5)
 										{
 											//item[i]->SetFlag( ex, ey, enemy[s]->GetItemType() );
 											switch (enemy[now_stage][s]->GetItemType())
@@ -1489,10 +1523,13 @@ void Game::BossCollisionAll()
 								iy = (rand() % 100 - 51) + by;
 								item[z].SetFlag( ix, iy, rand() % (ITEM_TYPE_NUM - 1) + 1 );
 								++itemnum;
-								if (itemnum == 10) break;
+								if (itemnum == 12) break;
 							}
 						}
-						count = -100;
+
+						//ボス討伐後，一時停止
+						count = -60;
+
 						if (now_stage == STAGE_NUM - 1)
 						{
 							//クリアファンファーレ
@@ -1567,9 +1604,11 @@ void Game::BossCollisionAll()
 					if (!effect_pbarrier->GetBarrierFlag())
 					{
 						//該当の弾が既にグレイズしているかチェック
-						if (!boss[now_count]->GetGrazeFlag( i ))
+						//if (!boss[now_count]->GetGrazeFlag( i ))
+						if (!boss[now_stage]->GetGrazeFlag( i ))
 						{
-							boss[now_count]->SetGrazeFlag( i );
+							//boss[now_count]->SetGrazeFlag( i );
+							boss[now_stage]->SetGrazeFlag( i );
 							//まだ使われてないグレイズエフェクトを探す
 							for (int z = 0; z < GRAZE_NUM; ++z)
 							{

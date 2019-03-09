@@ -17,19 +17,19 @@ Boss::Boss( int stage_num )
 	{
 		gh_face[0] = LoadGraph( "../images/boss02.png" );
 		gh_face[1] = LoadGraph( "../images/boss02_damage.png" );
-		hp = BOSS1_HP;
+		hp = 500;//BOSS1_HP;
 	}
 	else if (stage_num == 2)
 	{
 		gh_face[0] = LoadGraph( "../images/boss03.png" );
 		gh_face[1] = LoadGraph( "../images/boss03_damage.png" );
-		hp = BOSS2_HP;
+		hp = 700;// BOSS2_HP;
 	}
 	else if (stage_num == 3)
 	{
 		gh_face[0] = LoadGraph( "../images/boss04.png" );
 		gh_face[1] = LoadGraph( "../images/boss04_damage.png" );
-		hp = BOSS3_HP;
+		hp = 1000;// BOSS3_HP;
 	}
 	else
 	{
