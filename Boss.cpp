@@ -17,19 +17,19 @@ Boss::Boss( int stage_num )
 	{
 		gh_face[0] = LoadGraph( "../images/boss02.png" );
 		gh_face[1] = LoadGraph( "../images/boss02_damage.png" );
-		hp = 500;//BOSS1_HP;
+		hp = BOSS1_HP;
 	}
 	else if (stage_num == 2)
 	{
 		gh_face[0] = LoadGraph( "../images/boss03.png" );
 		gh_face[1] = LoadGraph( "../images/boss03_damage.png" );
-		hp = 700;// BOSS2_HP;
+		hp = BOSS2_HP;
 	}
 	else if (stage_num == 3)
 	{
 		gh_face[0] = LoadGraph( "../images/boss04.png" );
 		gh_face[1] = LoadGraph( "../images/boss04_damage.png" );
-		hp = 1000;// BOSS3_HP;
+		hp = BOSS3_HP;
 	}
 	else
 	{
@@ -88,6 +88,12 @@ Boss::Boss( int stage_num )
 
 
 	s_shot = false;
+
+	gauge = 0;
+	gauge_width = 200;
+
+	h = 0;
+	r = g = b = 0;
 	//scflag = false;
 }
 
@@ -125,6 +131,8 @@ void Boss::Move()
 			MoveToDefault();
 			break;
 	}
+
+
 }
 
 void Boss::Shot()
@@ -498,6 +506,32 @@ void Boss::Draw()
 		DrawRotaGraph( x, y, 1.0, 0, gh_face[0], TRUE );
 	}
 
+	switch (stage_num)
+	{
+		case 1:
+			gauge = gauge_width * hp / BOSS1_HP;
+			h = hp * (512.0f / BOSS1_HP) - 100;
+			break;
+
+		case 2:
+			gauge = gauge_width * hp / BOSS2_HP;
+			h = hp * (512.0f / BOSS2_HP) - 100;
+			break;
+
+		case 3:
+			gauge = gauge_width * hp / BOSS3_HP;
+			h = hp * (512.0f / BOSS3_HP) - 100;
+			break;
+
+		default:
+
+			break;
+	}
+
+	r = min( max( (384 - h), 0 ), 0xff );
+	g = min( max( (h + 64), 0 ), 0xff );
+	b = max( (h - 384), 0 );
+	DrawBox( 100, 10, 100 + gauge, 10 + 19, GetColor( r, g, b ), true );
 
 	damageflag = false;
 }

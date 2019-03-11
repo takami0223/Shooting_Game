@@ -77,6 +77,14 @@ private:
 
 	int stage_num;
 
+	int gauge;
+	int gauge_width;
+
+	double h;
+	unsigned int r;
+	unsigned int g;
+	unsigned int b;
+
 	//bool scflag;
 
 public:

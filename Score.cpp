@@ -179,7 +179,7 @@ void Score::Draw()
 	g_b = max( (g_h - 384), 0 );
 	DrawBox( SCORE_X + 110, 137, SCORE_X + 110 + grazeGauge, 156, GetColor( g_r, g_g, g_b ), true );
 
-	num = snprintf( buf, sizeof( buf ), "%d", graze );
+	num = snprintf( buf, sizeof( buf ), "%d", (graze % BARRIER_OPEN_NUM) );
 	if (graze >= GRAZE_LINIT)
 	{
 		for (int i = 0; i < num; ++i)

@@ -148,8 +148,8 @@ struct E_Shot
 #define BOSS_SHOTNUM 150
 #define BOSS_SHAKE 20
 #define BOSS1_HP 500
-#define BOSS2_HP 1000
-#define BOSS3_HP 1500
+#define BOSS2_HP 700//1000
+#define BOSS3_HP 1000//1500
 
 
 //Effect_Edead
@@ -171,6 +171,6 @@ struct E_Shot
 #define BALL_INITY 30
 #define BALL_SHAKE 15
 //Back
-#define SCROLL_SPEED 2//10
+#define SCROLL_SPEED 2
 
 //#endif // !_DEFINE_H_

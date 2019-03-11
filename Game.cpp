@@ -1110,7 +1110,7 @@ bool Game::CircleCollision( double c1, double c2, double cx1, double cx2, double
 
 void Game::EnemyCollisionAll()
 {
-	double px, py, ex, ey;
+	double px, py, psx, psy, ex, ey;
 
 	bool tempflag = false;
 	bool gtempflag = false;
@@ -1118,7 +1118,7 @@ void Game::EnemyCollisionAll()
 	//操作キャラの弾と敵との当たり判定
 	for (int i = 0; i < PSHOT_NUM; ++i)
 	{
-		if (player->GetShotPosition( i, &px, &py ))
+		if (player->GetShotPosition( i, &psx, &psy ))
 		{
 			for (int s = 0; s < enemy[now_stage].size(); ++s)
 			{
@@ -1127,7 +1127,7 @@ void Game::EnemyCollisionAll()
 				{
 					enemy[now_stage][s]->GetPosition( &ex, &ey );
 					//当たり判定
-					if (CircleCollision( PSHOT_COLLISION, ENEMY1_COLLISION, px, ex, py, ey ))
+					if (CircleCollision( PSHOT_COLLISION, ENEMY1_COLLISION, psx, ex, psy, ey ))
 					{
 						//当たっていれば、deadflagを立てる
 						//enemy[s]->SetDeadFlag();
@@ -1211,6 +1211,72 @@ void Game::EnemyCollisionAll()
 		}
 	}
 
+	//敵と操作キャラとの当たり判定
+	//プレイヤーが「生きていて」「ダメージを受けておらず」「バリア中にダメージを受けていない」
+	if (!player->GetDeadFlag() && !player->GetDamageFlag() && !player->GetDamageZeroFlag())
+	{
+		player->GetPosition( &px, &py );
+		for (int i = 0; i < enemy[now_stage].size(); i++)
+		{
+			if (enemy[now_stage][i] != NULL && !enemy[now_stage][i]->GetDeadFlag())
+			{
+				enemy[now_stage][i]->GetPosition( &ex, &ey );
+				if (CircleCollision( PLAYER_COLLISION, ENEMY1_COLLISION, px, ex, py, ey ))
+				{
+					tempflag = true;
+				}
+
+				if (tempflag)
+				{
+					//バリアが展開されていなければ
+					if (!effect_pbarrier->GetBarrierFlag())
+					{
+						//操作キャラのdamageflagを立てる
+						player->SetDamageFlag( 1 );
+						//弾を消す
+						//enemy[now_stage][i]->SetShotFlag( s, false );
+
+						if (player->GetStatus( HP ) <= 0)
+						{
+							//プレイヤー消滅音フラグを立てる
+							pdead_flag = true;
+
+							//プレイヤー消滅エフェクト
+							PlayerDeadEffect( px, py );
+
+							//ステータス減少
+							player->AddStatus( STOCK, -1 );
+							player->AddStatus( SPEED, -3 );
+							player->AddStatus( POWER, -3 );
+							player->AddStatus( HP, PLAYER_LIFE );
+						}
+						else
+						{
+							pdamage_flag = true;
+						}
+					}
+					else// if (effect_pbarrier->GetBarrierFlag())
+					{
+						player->SetDamageFlag( 0 );
+						effect_pbarrier->Add_BarrierHp( -1/*-enemy[i]->GetShotDamage( s )*/ );
+						//enemy[now_stage][i]->SetShotFlag( s, false );
+
+						if (effect_pbarrier->GetBarrierHp() <= 0)
+						{
+							player->AddStatus( GRAZE, 1 );
+							//effect_pbarrier->SetBarrierFlag( false );
+							pbarrier_break_flag = true;
+						}
+						pbarrier_damage_flag = true;
+					}
+					//一時フラグを戻す
+					tempflag = false;
+					break;
+				}
+			}
+		}
+	}
+
 	//敵の弾と操作キャラとの当たり判定
 	//プレイヤーが「生きていて」「ダメージを受けておらず」「バリア中にダメージを受けていない」
 	if (!player->GetDeadFlag() && !player->GetDamageFlag() && !player->GetDamageZeroFlag())
@@ -1222,6 +1288,7 @@ void Game::EnemyCollisionAll()
 			{
 				for (int s = 0; s < ENEMY_SNUM; ++s)
 				{
+
 					//弾フラグが立っていればtrueを返す
 					if (enemy[now_stage][i]->GetShotPosition( s, &ex, &ey ))
 					{
@@ -1372,12 +1439,15 @@ void Game::EnemyCollisionAll()
 		}
 
 	}
+
+	//アイテムと操作キャラとの当たり判定
+	//プレイヤーが「生きていて」「ダメージを受けておらず」「バリア中にダメージを受けていない」
 	if (!player->GetDeadFlag() && !player->GetDamageFlag() || player->GetDamageZeroFlag())
 	{
 
 		double ix, iy;
 		player->GetPosition( &px, &py );
-		//アイテムとプレイヤーとの当たり判定
+
 		for (int i = 0; i < ITEM_NUM; ++i)
 		{
 			if (item[i].GetFlag())
@@ -1426,7 +1496,7 @@ void Game::EnemyCollisionAll()
 
 void Game::BossCollisionAll()
 {
-	double px, py, bx, by, ix, iy;
+	double px, py, psx, psy, bx, by, ix, iy;
 
 	//出すアイテム数
 	int itemnum = 0;
@@ -1437,15 +1507,74 @@ void Game::BossCollisionAll()
 	//ボスの弾の種類
 	int type;
 
+	//プレイヤーとボスの当たり判定
+	if (!player->GetDeadFlag() && !player->GetDamageFlag() && !player->GetDamageZeroFlag())
+	{
+		player->GetPosition( &px, &py );
+		boss[now_stage]->GetPosition( &bx, &by );
+
+		if (CircleCollision( PLAYER_COLLISION, BOSS_COLLISION, px, bx, py, by ))
+		{
+			hflag = true;
+		}
+
+		if (hflag)
+		{
+			//バリアが展開されていなければ
+			if (!effect_pbarrier->GetBarrierFlag())
+			{
+				//操作キャラのdamageflagを立てる
+				player->SetDamageFlag( 1 );
+				//弾を消す
+				//boss[now_stage]->SetShotFlag( i, false );
+
+				if (player->GetStatus( HP ) <= 0)
+				{
+					//プレイヤー消滅音フラグを立てる
+					pdead_flag = true;
+
+					//プレイヤー消滅エフェクト
+					PlayerDeadEffect( px, py );
+
+					//ステータス減少
+					player->AddStatus( STOCK, -1 );
+					player->AddStatus( SPEED, -3 );
+					player->AddStatus( POWER, -3 );
+					player->AddStatus( HP, PLAYER_LIFE );
+				}
+				else
+				{
+					pdamage_flag = true;
+				}
+			}
+			else// if (effect_pbarrier->GetBarrierFlag())
+			{
+				player->SetDamageFlag( 0 );
+				effect_pbarrier->Add_BarrierHp( -1/*-enemy[i]->GetShotDamage( s )*/ );
+				//boss[now_stage]->SetShotFlag( i, false );
+
+				if (effect_pbarrier->GetBarrierHp() <= 0)
+				{
+					player->AddStatus( GRAZE, 1 );
+					//effect_pbarrier->SetBarrierFlag( false );
+					pbarrier_break_flag = true;
+				}
+				pbarrier_damage_flag = true;
+			}
+			//一時フラグを戻す
+			hflag = false;
+		}
+	}
+
 	//プレイヤーのショットとボスの当たり判定
 	if (!boss[now_stage]->GetNodamageFlag())
 	{
 		for (int i = 0; i < PSHOT_NUM; ++i)
 		{
-			if (player->GetShotPosition( i, &px, &py ))
+			if (player->GetShotPosition( i, &psx, &psy ))
 			{
 				boss[now_stage]->GetPosition( &bx, &by );
-				if (CircleCollision( PSHOT_COLLISION, BOSS_COLLISION, px, bx, py, by ))
+				if (CircleCollision( PSHOT_COLLISION, BOSS_COLLISION, psx, bx, psy, by ))
 				{
 					boss[now_stage]->SetHp( -1 );
 					player->SetShotFlag( i, false );
@@ -1547,6 +1676,7 @@ void Game::BossCollisionAll()
 							player->AddStatus( SPEED_LIMIT, 5 );
 
 							now_stage++;
+							back->SetNowStage( now_stage );
 						}
 					}
 
@@ -1681,6 +1811,7 @@ void Game::BossCollisionAll()
 			}
 		}
 	}
+
 	//アイテムとプレイヤーの当たり判定
 	if (!player->GetDeadFlag() && !player->GetDamageFlag() || player->GetDamageZeroFlag())
 	{
@@ -1725,6 +1856,7 @@ void Game::BossCollisionAll()
 			}
 		}
 	}
+
 	//ライフは毎回取得
 	score->SetScore( GRAZE_SCORE, player->GetStatus( GRAZE ) );
 	score->SetScore( SPEED_SCORE, player->GetStatus( SPEED ) );
